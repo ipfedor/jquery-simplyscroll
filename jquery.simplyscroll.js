@@ -14,8 +14,9 @@
 (function($,window,undefined) {
 
 $.fn.simplyScroll = function(options) {
-	return this.each(function() {
-		new $.simplyScroll(this,options);
+    var cnt = this.length - 1;
+	return this.each(function(i, v) {
+		new $.simplyScroll(this, options, i == cnt);
 	});
 };
 
@@ -35,10 +36,11 @@ var defaults = {
     callback: false     // fperesadov for after init callback
 };
 
-$.simplyScroll = function(el,options) {
+$.simplyScroll = function(el,options,last) {
 
 	var self = this;
 	el._this = this;
+    this.last = last;
 
 	this.o = $.extend({}, defaults, options || {});
 	this.isAuto = this.o.auto!==false && this.o.autoMode.match(/^loop|bounce$/)!==null;
@@ -146,10 +148,11 @@ $.simplyScroll.fn.extend({
 		this.$btnForward = $('.simply-scroll-forward',this.$container);
 
 		if (!this.isHorizontal) {
-			if (this.$list[0].scrollHeight == undefined) {
+            var sh = this.$list[0].scrollHeight;
+			if (sh == undefined || sh == 0) {
 				this.itemMax = this.$items.eq(0).outerHeight(true);
 			} else {
-				this.itemMax = this.$items.length == 1 ? this.$list[0].scrollHeight : Math.floor(this.$list[0].scrollHeight / this.$items.length);
+				this.itemMax = this.$items.length == 1 ? sh : Math.floor(sh / this.$items.length);
 			}
 			this.clipMax = this.$clip.height();
 			this.dimension = 'height';
@@ -361,7 +364,7 @@ $.simplyScroll.fn.extend({
 			}
 		}
         // fperesadov for after init callback
-        if (typeof this.o.callback == 'function')
+        if (typeof this.o.callback == 'function' && this.last)
             this.o.callback();
 	},
 	moveForward: function() {
